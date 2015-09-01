@@ -18,22 +18,21 @@ import Database.Persist.TH
 import Database.Persist.Quasi
 
 import Crypto.Types.PubKey.ECC
-import Data.Text
 
+import Data.Text
 import Data.Time
 
 import Blockchain.Data.Address
-import Blockchain.Database.MerklePatricia
+import Blockchain.Data.PersistTypes ()
+import Blockchain.Data.MiscJSON ()
 import Blockchain.Data.Transaction
-import Blockchain.Data.PersistTypes()
+import Blockchain.Database.MerklePatricia
 
 import qualified Data.ByteString as BS
 
 import Blockchain.SHA
 import Blockchain.ExtWord
 import Data.Word
-
-import Blockchain.Data.MiscJSON()
 
 entityDefs :: [EntityDef]
 entityDefs = $(persistFileWith lowerCaseSettings "src/Blockchain/Data/DataDefs.txt")

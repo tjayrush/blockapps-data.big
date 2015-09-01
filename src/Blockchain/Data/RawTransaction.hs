@@ -15,6 +15,7 @@ module Blockchain.Data.RawTransaction (
   RawTransaction(..)
   ) where
 
+
 import Blockchain.Data.DataDefs
 
 {-
