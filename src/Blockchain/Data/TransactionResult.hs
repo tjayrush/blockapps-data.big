@@ -10,7 +10,6 @@ import qualified Database.Persist.Postgresql as SQL
 import Control.Monad.State
 import Control.Monad.Trans.Resource
 
-
 import Blockchain.Data.DataDefs
 import Blockchain.DB.SQLDB
 

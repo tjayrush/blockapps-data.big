@@ -17,7 +17,6 @@ import Database.Persist.Postgresql hiding (get)
 import System.Directory
 import System.FilePath
 
-
 import qualified Blockchain.Database.MerklePatricia as MP
 import Blockchain.Data.ProcessedDB
 import Blockchain.Data.DataDefs

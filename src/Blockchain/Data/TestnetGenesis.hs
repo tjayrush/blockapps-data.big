@@ -5,11 +5,11 @@ module Blockchain.Data.TestnetGenesis where
 import qualified Data.ByteString as B
 import Data.Time.Clock.POSIX
 
+import Network.Haskoin.Crypto
 import Blockchain.Constants
 import Blockchain.Data.Address
 import Blockchain.Data.GenesisInfo
 import Blockchain.Database.MerklePatricia
-import Blockchain.ExtWord
 import Blockchain.SHA
 
 genesisInfo::GenesisInfo
@@ -32,8 +32,7 @@ genesisInfo =
     genesisInfoNonce = 42 -- hash $ B.pack [42]
     }
   
-
-testnetAccountInfo::[(Word160, Integer)]
+testnetAccountInfo :: [(Word160,Integer)]
 testnetAccountInfo =
         [
           (0x0000000000000000000000000000000000000001, 1 * wei),
