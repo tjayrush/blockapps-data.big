@@ -86,7 +86,8 @@ getAddressState address = do
     case states of
       Nothing -> do
         -- Querying an absent state counts as initializing it.
-        putAddressState address b
+        --TODO- decide if this is needed
+        --putAddressState address b
         return b
         where b = blankAddressState
       Just s -> return $ (rlpDecode . rlpDeserialize . rlpDecode) s
@@ -112,19 +113,21 @@ getStorageKeyFromHash  =
 putAddressState::(HasStateDB m, HasHashDB m)=>Address->AddressState->m ()
 putAddressState address newState = do
   hashDBPut addrNibbles
-  db <- getStateDB
-  
-  db' <- MP.putKeyVal db addrNibbles $ rlpEncode $ rlpSerialize $ rlpEncode newState
-  setStateDBStateRoot (MP.stateRoot db')
+  if newState == blankAddressState
+     then deleteAddressState address
+     else do
+       db <- getStateDB
+       db' <- MP.putKeyVal db addrNibbles $ rlpEncode $ rlpSerialize $ rlpEncode newState
+       setStateDBStateRoot (MP.stateRoot db')
   where addrNibbles = addressAsNibbleString address
 
-deleteAddressState::(HasStateDB m, MonadResource m)=>Address->m ()
+deleteAddressState::HasStateDB m=>Address->m ()
 deleteAddressState address = do
   db <- getStateDB
   db' <- MP.deleteKey db (addressAsNibbleString address)
   setStateDBStateRoot $ MP.stateRoot db'
 
-addressStateExists::(HasStateDB m, MonadResource m)=>Address->m Bool
+addressStateExists::HasStateDB m=>Address->m Bool
 addressStateExists address = do
   db <- getStateDB
   MP.keyExists db (addressAsNibbleString address)
