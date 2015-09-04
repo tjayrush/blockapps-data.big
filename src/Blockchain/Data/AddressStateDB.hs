@@ -114,12 +114,9 @@ getStorageKeyFromHash  =
 putAddressState::(HasStateDB m, HasHashDB m)=>Address->AddressState->m ()
 putAddressState address newState = do
   hashDBPut addrNibbles
-  if newState == blankAddressState
-     then deleteAddressState address
-     else do
-       db <- getStateDB
-       db' <- MP.putKeyVal db addrNibbles $ rlpEncode $ rlpSerialize $ rlpEncode newState
-       setStateDBStateRoot (MP.stateRoot db')
+  db <- getStateDB
+  db' <- MP.putKeyVal db addrNibbles $ rlpEncode $ rlpSerialize $ rlpEncode newState
+  setStateDBStateRoot (MP.stateRoot db')
   where addrNibbles = addressAsNibbleString address
 
 deleteAddressState::HasStateDB m=>Address->m ()
