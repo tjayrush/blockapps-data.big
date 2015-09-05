@@ -56,11 +56,12 @@ blankAddressState = AddressState { addressStateNonce=0, addressStateBalance=0, a
 
 
 instance Format AddressState where
-  format a = CL.blue "AddressState" ++
-             tab("\nnonce: " ++ showHex (addressStateNonce a) "" ++
-                 "\nbalance: " ++ show (toInteger $ addressStateBalance a) ++ 
-                 "\ncontractRoot: " ++ format (addressStateContractRoot a) ++
-                 "\ncodeHash: " ++ format (addressStateCodeHash a))
+  format a =
+    CL.blue "AddressState" ++
+    tab("\nnonce: " ++ showHex (addressStateNonce a) "" ++
+        "\nbalance: " ++ show (toInteger $ addressStateBalance a) ++ 
+        "\ncontractRoot: " ++ format (addressStateContractRoot a) ++
+        "\ncodeHash: " ++ format (addressStateCodeHash a))
   
 instance RLPSerializable AddressState where
   rlpEncode a | addressStateBalance a < 0 = error $ "Error in cal to rlpEncode for AddressState: AddressState has negative balance: " ++ format a
