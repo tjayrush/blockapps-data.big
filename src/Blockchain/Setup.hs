@@ -52,10 +52,6 @@ instance HasStateDB SetupDBM where
 instance HasHashDB SetupDBM where
   getHashDB = fmap hashDB get
 
-{-
-instance HasBlockDB SetupDBM where
-  getBlockDB = fmap setupDBBlockDB get-}
-
 instance HasCodeDB SetupDBM where
   getCodeDB = fmap codeDB get
 
@@ -83,6 +79,7 @@ oneTimeSetup genesisBlockName = do
     rawExecute "CREATE INDEX CONCURRENTLY ON raw_transaction (to_address);" []
     rawExecute "CREATE INDEX CONCURRENTLY ON raw_transaction (block_id);" []
     rawExecute "CREATE INDEX CONCURRENTLY ON raw_transaction (block_number);" [] 
+    rawExecute "CREATE INDEX CONCURRENTLY ON raw_transaction (tx_hash);" [] 
 
     rawExecute "CREATE INDEX CONCURRENTLY ON storage (key);" []
     
@@ -95,9 +92,11 @@ oneTimeSetup genesisBlockName = do
       liftIO $ createDirectoryIfMissing False $ homeDir </> dbDir "h"
       sdb <- DB.open (homeDir </> dbDir "h" ++ stateDBPath)
              DB.defaultOptions{DB.createIfMissing=True, DB.cacheSize=1024}
-      let hdb = sdb
-          cdb = sdb
-          smpdb = MP.MPDB{MP.ldb=sdb, MP.stateRoot=error "stateRoot not defined in oneTimeSetup"}
+      hdb <- DB.open (homeDir </> dbDir "h" ++ hashDBPath)
+             DB.defaultOptions{DB.createIfMissing=True, DB.cacheSize=1024}
+      cdb <- DB.open (homeDir </> dbDir "h" ++ codeDBPath)
+             DB.defaultOptions{DB.createIfMissing=True, DB.cacheSize=1024}
+      let smpdb = MP.MPDB{MP.ldb=sdb, MP.stateRoot=error "stateRoot not defined in oneTimeSetup"}
           
       pool <- runNoLoggingT $ createPostgresqlPool connStr 20
 
@@ -109,22 +108,18 @@ oneTimeSetup genesisBlockName = do
 
   return ()
 
-getGenesisBlockId::(HasSQLDB m, MonadResource m, MonadBaseControl IO m)=>
+getGenesisBlockId::HasSQLDB m=>
                    m (E.Key Block)
 getGenesisBlockId = do
-  db <- getSQLDB
-  ret <- runResourceT $
-    SQL.runSqlPool action db
+  ret <- sqlQuery $
+         E.select $
+         E.from $ \(bdRef `E.InnerJoin` block) -> do
+           E.on ( bdRef E.^. BlockDataRefBlockId E.==. block E.^. BlockId )
+           E.where_ (bdRef E.^. BlockDataRefNumber E.==. E.val 0 )
+           return $ block E.^. BlockId
 
   case ret of
     [] -> error "called getBlockIdFromBlock on a block that wasn't in the DB"
     [blockId] -> return (E.unValue blockId)
     _ -> error "called getBlockIdFromBlock on a block that appears more than once in the DB"
-  where
-    action =
-      E.select $
-      E.from $ \(bdRef `E.InnerJoin` block) -> do
-        E.on ( bdRef E.^. BlockDataRefBlockId E.==. block E.^. BlockId )
-        E.where_ (bdRef E.^. BlockDataRefNumber E.==. E.val 0 )
-        return $ block E.^. BlockId
 

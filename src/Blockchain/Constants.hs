@@ -43,14 +43,14 @@ rewardBase testnet = if testnet then 1500 * finney else 5000 * finney
 -------------
 
 
-blockDBPath::String
-blockDBPath="/blocks/"
-
-detailsDBPath::String
-detailsDBPath="/details/"
-
 stateDBPath::String
 stateDBPath="/state/"
+
+hashDBPath::String
+hashDBPath="/hash/"
+
+codeDBPath::String
+codeDBPath="/code/"
 
 dbDir::String->String
 dbDir "c" = ".ethereum"
