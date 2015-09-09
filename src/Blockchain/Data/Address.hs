@@ -110,8 +110,8 @@ pubKey2Address (PubKeyU _) = error "Missing case in pubKey2Address: PubKeyU"
 
 
 instance RLPSerializable Address where
-  rlpEncode (Address a) = RLPString $ BLC.unpack $ encode a
-  rlpDecode (RLPString s) = Address $ decode $ BLC.pack s
+  rlpEncode (Address a) = RLPString $ BL.toStrict $ encode a
+  rlpDecode (RLPString s) = Address $ decode $ BL.fromStrict s
   rlpDecode x = error ("Malformed rlp object sent to rlp2Address: " ++ show x)
 
 getNewAddress_unsafe ::Address->Integer->Address
