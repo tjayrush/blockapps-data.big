@@ -48,10 +48,8 @@ type DBMLite = StateT DBsLite (ResourceT IO)
 connStr::SQL.ConnectionString
 connStr = "host=localhost dbname=eth user=postgres password=api port=5432"
 
-openDBs::(MonadResource m, MonadBaseControl IO m)=>String->m DBs
-openDBs theType = do
-  homeDir <- liftIO getHomeDirectory                     
-  liftIO $ createDirectoryIfMissing False $ homeDir </> dbDir theType
+openDBs::(MonadResource m, MonadBaseControl IO m)=>m DBs
+openDBs = do
   sqldb <-   runNoLoggingT  $ SQL.createPostgresqlPool connStr 20
   SQL.runSqlPool (SQL.runMigration migrateAll) sqldb
   return $ DBs
