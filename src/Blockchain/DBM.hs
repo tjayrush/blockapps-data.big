@@ -12,8 +12,6 @@ module Blockchain.DBM (
   DBs(..),
   DBsLite(..),
   DBMLite,
-  --setStateRoot,
-  getStateRoot,
   openDBs,
   openDBsLite
   ) where
@@ -31,17 +29,12 @@ import qualified Database.Persist.Postgresql as SQL
 import Blockchain.Constants
 
 import Blockchain.Data.DataDefs
-import Blockchain.DB.CodeDB
-import Blockchain.DB.HashDB
 import Blockchain.DB.SQLDB
-import Blockchain.DB.StateDB
 
 --import Debug.Trace
 
 data DBs =
   DBs {
-    codeDB'::CodeDB,
-    hashDB'::HashDB,
     sqlDB'::SQLDB
     }
 
@@ -62,8 +55,6 @@ openDBs theType = do
   sqldb <-   runNoLoggingT  $ SQL.createPostgresqlPool connStr 20
   SQL.runSqlPool (SQL.runMigration migrateAll) sqldb
   return $ DBs
-      (error "codedb undefined")
-      (error "hashdb undefined")
       sqldb
 
 openDBsLite :: (MonadResource m, MonadBaseControl IO m) => SQL.ConnectionString -> m DBsLite
