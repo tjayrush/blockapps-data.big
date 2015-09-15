@@ -10,10 +10,7 @@
 
 module Blockchain.DBM (
   DBs(..),
-  DBsLite(..),
-  DBMLite,
-  openDBs,
-  openDBsLite
+  openDBs
   ) where
 
 
@@ -38,13 +35,6 @@ data DBs =
     sqlDB'::SQLDB
     }
 
-data DBsLite =
-  DBsLite {
-     sqlDBLite :: SQLDB
-     }
-
-type DBMLite = StateT DBsLite (ResourceT IO)
-
 connStr::SQL.ConnectionString
 connStr = "host=localhost dbname=eth user=postgres password=api port=5432"
 
@@ -54,9 +44,3 @@ openDBs = do
   SQL.runSqlPool (SQL.runMigration migrateAll) sqldb
   return $ DBs
       sqldb
-
-openDBsLite :: (MonadResource m, MonadBaseControl IO m) => SQL.ConnectionString -> m DBsLite
-openDBsLite connectionString = do
-  sqldb <- runNoLoggingT  $ SQL.createPostgresqlPool connectionString 20
-  SQL.runSqlPool (SQL.runMigration migrateAll) sqldb
-  return $ DBsLite sqldb
