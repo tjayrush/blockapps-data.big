@@ -78,9 +78,8 @@ RawTransaction
     txHash SHA
     deriving Show Read Eq    
 
-NeededBlockHashes 
+NeededBlockHash
     hash SHA
-    blockId BlockId
 
 PPeer 
     pubkey Point
