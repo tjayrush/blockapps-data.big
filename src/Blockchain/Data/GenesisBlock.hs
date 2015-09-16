@@ -89,7 +89,7 @@ initializeGenesisBlock genesisName = do
          "testnet" -> Testnet.genesisInfo
          _ -> error $ "Unknown genesis block name: " ++ genesisName
       )
-  genBlkId <- putBlock genesisBlock
+  (_, genBlkId) <- putBlock genesisBlock
   genAddrStates <- getAllAddressStates
   let diffFromPair (addr', addrS) = CreateAddr addr' addrS
   commitSqlDiffs genBlkId 0 $ map diffFromPair genAddrStates

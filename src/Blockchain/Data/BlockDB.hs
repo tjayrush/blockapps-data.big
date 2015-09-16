@@ -16,11 +16,10 @@ module Blockchain.Data.BlockDB (
   Block(..),
   BlockData(..),
   blockHash,
-  getBlock,
+--  getBlock,
   getBlockLite,
   putBlock,
-  putBlockSql,
-  putBlockLite,
+--  putBlockSql,
   rawTX2TX,
   tx2RawTX,
   tx2RawTX'
@@ -179,14 +178,8 @@ getBlockLite h = do
                                    return block                        
 
 putBlock::(HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>
-          Block->m (Key BlockDataRef)
+          Block->m (Key Block, Key BlockDataRef)
 putBlock b = do
-  blkDataId <- putBlockSql b
-  return blkDataId
-
-
-putBlockSql ::(HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>Block->m (Key BlockDataRef)
-putBlockSql b = do
   db <- getSQLDB
   runResourceT $
     SQL.runSqlPool actions db
@@ -194,33 +187,8 @@ putBlockSql b = do
           blkId <- SQL.insert $ b                      
           toInsert <- lift $ lift $ blk2BlkDataRef b blkId
           mapM_ (insertOrUpdate blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)))  (blockReceiptTransactions b)))
-          SQL.insert $ toInsert
-
-
-        insertOrUpdate blkid rawTX  = do
-            (txId :: [Entity RawTransaction])
-                 <- SQL.selectList [ RawTransactionTxHash SQL.==. (rawTransactionTxHash rawTX )]
-                                   [ ]
-            case txId of
-                [] -> do
-                      _ <- SQL.insert rawTX
-                      return ()
-                lst -> mapM_ (\t -> SQL.update (SQL.entityKey t)
-                                              [ RawTransactionBlockId SQL.=. blkid, 
-                                                RawTransactionBlockNumber SQL.=. (fromIntegral $ blockDataNumber (blockBlockData b)) ])
-                             lst
-
-putBlockLite ::(HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>Block->m (Key Block)
-putBlockLite b = do
-  db <- getSQLDB
-  runResourceT $
-    SQL.runSqlPool actions db
-  where actions = do
-          blkId <- SQL.insert $ b                      
-          toInsert <- lift $ lift $ blk2BlkDataRefLite b blkId
-          mapM_ (insertOrUpdate blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)))  (blockReceiptTransactions b)))
-          _ <- SQL.insert $ toInsert
-          return blkId
+          blkDataRefId <- SQL.insert $ toInsert
+          return $ (blkId, blkDataRefId)
 
         insertOrUpdate blkid rawTX  = do
             (txId :: [Entity RawTransaction])

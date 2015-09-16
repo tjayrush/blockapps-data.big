@@ -12,7 +12,6 @@ import Control.Monad.Trans.State
 import qualified Data.ByteString as B
 import qualified Database.Esqueleto as E
 import qualified Database.LevelDB as DB
-import qualified Database.Persist.Sql as SQL
 import Database.Persist.Postgresql hiding (get)
 import System.Directory
 import System.FilePath
