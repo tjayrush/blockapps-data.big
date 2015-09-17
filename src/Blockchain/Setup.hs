@@ -103,7 +103,7 @@ oneTimeSetup genesisBlockName = do
         addCode B.empty --blank code is the default for Accounts, but gets added nowhere else.
         _ <- initializeGenesisBlock genesisBlockName
         genesisBlockId <- getGenesisBlockId
-        putProcessed $ Processed genesisBlockId
+        putProcessed [Processed genesisBlockId]
 
   return ()
 

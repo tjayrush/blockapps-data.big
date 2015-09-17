@@ -25,10 +25,11 @@ import Control.Monad.State
 import Control.Monad.Trans.Resource
 
 putProcessed :: (HasSQLDB m, MonadIO m)=>
-               Processed->m (Key Processed)
-putProcessed p = do
+               [Processed]->m [Key Processed]
+putProcessed ps = do
   db <- getSQLDB
-  runResourceT $ flip SQL.runSqlPool db $ SQL.insert p
+  runResourceT $ flip SQL.runSqlPool db $
+    forM ps $ \p -> SQL.insert p
 
 --instance Format Processed where
 --  format Processed{processedBlockId=blockId} = CL.yellow $ format blockId
