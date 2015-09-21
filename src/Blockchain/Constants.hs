@@ -36,6 +36,8 @@ difficultyDurationLimit testnet =if testnet then 8 else 13
 
 difficultyAdjustment=11::Int
 
+difficultyExpDiffPeriod=100000
+
 minGasLimit testnet = if testnet then 125000 else 5000
 
 rewardBase testnet = if testnet then 1500 * finney else 5000 * finney
