@@ -16,6 +16,7 @@ import Database.Persist.Postgresql hiding (get)
 import System.Directory
 import System.FilePath
 
+import qualified Blockchain.Colors as CL
 import qualified Blockchain.Database.MerklePatricia as MP
 import Blockchain.Data.ProcessedDB
 import Blockchain.Data.DataDefs
@@ -64,7 +65,10 @@ connStr = "host=localhost dbname=eth user=postgres password=api port=5432"
 oneTimeSetup::String->IO ()
 oneTimeSetup genesisBlockName = do
   runNoLoggingT $ withPostgresqlConn connStr $ runReaderT $ do
+    liftIO $ putStrLn $ CL.yellow ">>>> Migrating SQL DB"
     runMigration migrateAll
+
+    liftIO $ putStrLn $ CL.yellow ">>>> Creating SQL Indexes"
     rawExecute "CREATE INDEX CONCURRENTLY ON block_data_ref (block_id);" []
     rawExecute "CREATE INDEX CONCURRENTLY ON block_data_ref (number);" []
     rawExecute "CREATE INDEX CONCURRENTLY ON block_data_ref (hash);" []
@@ -86,6 +90,8 @@ oneTimeSetup genesisBlockName = do
 
   _ <-
     runResourceT $ do
+      liftIO $ putStrLn $ CL.yellow ">>>> Setting UP DB handles"
+
       homeDir <- liftIO getHomeDirectory                     
 
       liftIO $ createDirectoryIfMissing False $ homeDir </> dbDir "h"
@@ -101,6 +107,7 @@ oneTimeSetup genesisBlockName = do
 
       flip runStateT (SetupDBs smpdb hdb cdb pool) $ do
         addCode B.empty --blank code is the default for Accounts, but gets added nowhere else.
+        liftIO $ putStrLn $ CL.yellow ">>>> Initializing Genesis Block"
         _ <- initializeGenesisBlock genesisBlockName
         genesisBlockId <- getGenesisBlockId
         putProcessed [Processed genesisBlockId]
