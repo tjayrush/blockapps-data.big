@@ -24,7 +24,7 @@ import Data.Time
 
 import Blockchain.Data.Address
 import Blockchain.Data.PersistTypes ()
-import Blockchain.Data.MiscJSON ()
+import Blockchain.MiscJSON ()
 import Blockchain.Data.Transaction
 import Blockchain.Database.MerklePatricia
 

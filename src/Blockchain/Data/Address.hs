@@ -27,6 +27,8 @@ import Control.Applicative
 import qualified Crypto.Hash.SHA3 as C
 import Data.Binary
 import qualified Data.ByteString as B
+import qualified Data.ByteString.Base16 as B16
+import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Lazy.Char8 as BLC
 import qualified Data.NibbleString as N
@@ -67,13 +69,10 @@ instance PathPiece Address where
  make into a string rather than an object
 -}                   
 instance AS.ToJSON Address where
-  toJSON (Address x) = AS.object [ "address" AS..= (showHex x "") ]
+  toJSON (Address x) = String $ T.pack $ padZeros 20 $ showHex x ""
          
 instance AS.FromJSON Address where
-  parseJSON (Object v) = pure $ Address hex
-    where
-      ((hex, _):_) = readHex $ prsd :: [(Word160,String)]
-      (Success prsd) = parse (.: "address") v
+  parseJSON (String s) = pure $ Address $ fst $ head $ readHex $ T.unpack s
   parseJSON _ = mzero
    
 instance Pretty Address where

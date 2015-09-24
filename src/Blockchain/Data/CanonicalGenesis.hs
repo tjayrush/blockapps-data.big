@@ -40,8 +40,8 @@ canonicalGenesisInfo =
     genesisInfoNonce = 0x42
     }
 
-canonicalAccountInfo::[(Word160, Integer)]
-canonicalAccountInfo = [
+canonicalAccountInfo::[(Address, Integer)]
+canonicalAccountInfo = map (\(x, y) -> (Address x, y)) [
   (0x3282791d6fd713f1e94f4bfd565eaa78b3a0599d::Word160, 1337000000000000000000),
   (0x17961d633bcf20a7b029a7d94b7df4da2ec5427f, 229427000000000000000),
   (0x493a67fe23decc63b10dda75f3287695a81bd5ab, 880000000000000000000),

@@ -8,6 +8,8 @@ module Blockchain.Data.GenesisBlock (
 import Control.Monad
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Resource
+import Data.Aeson
+import qualified Data.ByteString.Lazy.Char8 as BLC
 
 import Blockchain.Database.MerklePatricia
 
@@ -36,12 +38,12 @@ initializeBlankStateDB = do
   setStateDBStateRoot emptyTriePtr
 
 initializeStateDB::(HasStateDB m, HasHashDB m)=>
-                   [(Word160, Integer)]->m ()
+                   [(Address, Integer)]->m ()
 initializeStateDB addressInfo = do
   initializeBlankStateDB
   
   forM_ addressInfo $ \(address, balance) ->
-    putAddressState (Address address) blankAddressState{addressStateBalance=balance}
+    putAddressState address blankAddressState{addressStateBalance=balance}
 
 
 
@@ -80,6 +82,7 @@ genesisInfoToGenesisBlock gi = do
 initializeGenesisBlock::(HasStateDB m, HasCodeDB m, HasSQLDB m, HasHashDB m)=>
                         String->m Block
 initializeGenesisBlock genesisName = do
+  liftIO $ putStrLn $ BLC.unpack $ encode $ toJSON canonicalGenesisInfo
   genesisBlock <-
       genesisInfoToGenesisBlock
       (

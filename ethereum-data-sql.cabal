@@ -90,8 +90,6 @@ library
                    Blockchain.DB.StorageDB
                    Blockchain.ExtDBs
                    Blockchain.Setup
-    other-modules:
-                   Blockchain.Data.MiscJSON
     ghc-options: -Wall -O2 -static
     extensions: TemplateHaskell
     buildable: True

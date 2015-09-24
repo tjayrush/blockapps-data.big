@@ -38,8 +38,6 @@ data RawTransaction' = RawTransaction' RawTransaction String deriving (Eq, Show)
 instance FromJSON Code
 instance ToJSON Code 
 
-instance ToJSON SHAPtr 
-instance FromJSON SHAPtr
 {- note we keep the file MiscJSON around for the instances we don't want to export - ByteString, Point -}
 
 instance ToJSON RawTransaction' where

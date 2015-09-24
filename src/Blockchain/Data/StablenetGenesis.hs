@@ -34,9 +34,8 @@ stablenetGenesisInfo =
     genesisInfoNonce = 42 -- hash $ B.pack [42]
     }
 
-alternateAddresses::[Word160]
-alternateAddresses =
-        [
+alternateAddresses::[Address]
+alternateAddresses = map Address [
           0xe1fd0d4a52b75a694de8b55528ad48e2e2cf7859,
 
           0xaf8b2d3fe28201476fc0a3961f8f9690693f3ef4,
@@ -91,6 +90,6 @@ alternateAddresses =
           0x5827a72671940a93d99ec86f47db244d0e0fa442
         ]
 
-stablenetAccountInfo::[(Word160, Integer)]
+stablenetAccountInfo::[(Address, Integer)]
 stablenetAccountInfo = map (, 1 `shiftL` 250) alternateAddresses
 
