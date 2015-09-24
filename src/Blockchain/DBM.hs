@@ -17,6 +17,7 @@ module Blockchain.DBM (
 import Control.Monad.IO.Class
 import Control.Monad.State
 import Control.Monad.Trans.Resource
+import qualified Data.ByteString.Char8 as BC
 import System.Directory
 import System.FilePath
 
@@ -27,6 +28,7 @@ import Blockchain.Constants
 
 import Blockchain.Data.DataDefs
 import Blockchain.DB.SQLDB
+import Blockchain.EthConf
 
 --import Debug.Trace
 
@@ -38,9 +40,12 @@ data DBs =
 connStr::SQL.ConnectionString
 connStr = "host=localhost dbname=eth user=postgres password=api port=5432"
 
+connStr'::SQL.ConnectionString
+connStr' = BC.pack $ "host=localhost dbname=eth user=postgres password=api port=" ++ show (port $ sqlConfig ethConf)
+
 openDBs::(MonadResource m, MonadBaseControl IO m)=>m DBs
 openDBs = do
-  sqldb <-   runNoLoggingT  $ SQL.createPostgresqlPool connStr 20
+  sqldb <-   runNoLoggingT  $ SQL.createPostgresqlPool connStr' 20
   SQL.runSqlPool (SQL.runMigration migrateAll) sqldb
   return $ DBs
       sqldb

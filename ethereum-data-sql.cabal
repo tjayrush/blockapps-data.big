@@ -30,6 +30,7 @@ library
                  , directory
                  , either
                  , entropy
+                 , ethereum-conf
                  , ethereum-merkle-patricia-db
                  , ethereum-rlp
                  , filepath
