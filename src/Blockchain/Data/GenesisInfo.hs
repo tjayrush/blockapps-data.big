@@ -39,21 +39,21 @@ instance FromJSON GenesisInfo where
   parseJSON (Object o) =
     GenesisInfo <$>
     o .: "parentHash" <*>
-    (return $ SHA 0xc0) <*> --UnclesHash"
+    o .: "unclesHash" <*>
     o .: "coinbase" <*>
-    o .: "AccountInfo" <*>
-    (return emptyTriePtr) <*> --TransactionsRoot
-    (return emptyTriePtr) <*> --ReceiptsRoot
-    (return $ B.replicate 256 0) <*> --LogBloom
+    o .: "accountInfo" <*>
+    o .: "transactionRoot" <*>
+    o .: "receiptsRoot" <*>
+    o .: "logBloom" <*>
     o .: "difficulty" <*>
-    (return 0) <*> --number
+    o .: "number" <*>
     o .: "gasLimit" <*>
-    (return 0) <*> --gasUsed
+    o .: "gasUsed" <*>
     o .: "timestamp" <*>
     o .: "extraData" <*>
-    o .: "mixhash" <*>
+    o .: "mixHash" <*>
     o .: "nonce"
-  parseJSON _ = undefined
+  parseJSON x = error $ "couldn't parse JSON for genesis block: " ++ show x
   
 instance ToJSON GenesisInfo where
   toJSON x =

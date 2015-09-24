@@ -10,6 +10,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Resource
 import Data.Aeson
 import qualified Data.ByteString.Lazy.Char8 as BLC
+import Data.Maybe
 
 import Blockchain.Database.MerklePatricia
 
@@ -82,8 +83,19 @@ genesisInfoToGenesisBlock gi = do
 initializeGenesisBlock::(HasStateDB m, HasCodeDB m, HasSQLDB m, HasHashDB m)=>
                         String->m Block
 initializeGenesisBlock genesisName = do
-  liftIO $ putStrLn $ BLC.unpack $ encode $ toJSON canonicalGenesisInfo
+  --liftIO $ putStrLn $ BLC.unpack $ encode $ toJSON canonicalGenesisInfo
+  theJSONString <- liftIO $ BLC.readFile "genesis.json"
+
+  let theJSON =
+        case eitherDecode theJSONString of
+          Left x -> error x
+          Right x -> x
+  
   genesisBlock <-
+      genesisInfoToGenesisBlock theJSON
+  
+      
+{-  genesisBlock <-
       genesisInfoToGenesisBlock
       (
        case genesisName of
@@ -91,7 +103,7 @@ initializeGenesisBlock genesisName = do
          "canonical" -> canonicalGenesisInfo
          "testnet" -> Testnet.genesisInfo
          _ -> error $ "Unknown genesis block name: " ++ genesisName
-      )
+      ) -}
   (_, genBlkId) <- putBlock genesisBlock
   genAddrStates <- getAllAddressStates
   let diffFromPair (addr', addrS) = CreateAddr addr' addrS
