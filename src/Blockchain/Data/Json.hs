@@ -13,7 +13,6 @@ import Blockchain.Data.DataDefs
 import Blockchain.Data.Address
 import Blockchain.Data.Transaction
 import Blockchain.Data.Code
-import Blockchain.Database.MerklePatricia
 
 import Data.Aeson
 import qualified Data.ByteString.Base16 as B16

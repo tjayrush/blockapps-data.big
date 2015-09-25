@@ -16,10 +16,8 @@ module Blockchain.Data.BlockDB (
   Block(..),
   BlockData(..),
   blockHash,
---  getBlock,
-  getBlockLite,
+  getBlock,
   putBlock,
---  putBlockSql,
   rawTX2TX,
   tx2RawTX,
   tx2RawTX'
@@ -30,9 +28,7 @@ import qualified Database.Persist.Postgresql as SQL
 import qualified Database.Esqueleto as E
 
 
-import Data.Binary hiding (get,put)
 import qualified Data.ByteString as B
-import qualified Data.ByteString.Lazy as BL
 
 import Data.Functor
 import Data.List
@@ -46,7 +42,6 @@ import Text.PrettyPrint.ANSI.Leijen hiding ((<$>))
 import Blockchain.Data.Address
 import qualified Blockchain.Colors as CL
 
-import Blockchain.DB.BlockDB
 import Blockchain.DB.SQLDB
 
 import Blockchain.ExtWord
@@ -78,7 +73,8 @@ tx2RawTX tx blkId blkNum =
 tx2RawTX' :: Transaction -> RawTransaction
 tx2RawTX' tx = tx2RawTX tx (E.toSqlKey 1) (-1)
 
-calcTotalDifficulty :: (HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>Block -> BlockId -> m Integer
+calcTotalDifficulty :: (HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>
+                       Block -> BlockId -> m Integer
 calcTotalDifficulty b _ = do
   db <- getSQLDB
   let bd = blockBlockData b
@@ -95,26 +91,8 @@ calcTotalDifficulty b _ = do
   where getParent h = do
           SQL.selectFirst [ BlockDataRefHash SQL.==. h ] []
 
-calcTotalDifficultyLite :: (HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)
-                        => Block -> BlockId -> m Integer
-calcTotalDifficultyLite b _ = do
-  pool <- getSQLDB
-  let bd = blockBlockData b
-
-  parent <- runResourceT $
-     SQL.runSqlPool (getParent (blockDataParentHash bd)) pool
-  case parent of
-    Nothing ->
-      case (blockDataNumber bd) of
-        0 -> return (blockDataDifficulty bd)
-        _ ->  error "couldn't find parent to calculate difficulty"
-    Just p -> return $ (blockDataRefTotalDifficulty . entityVal $ p) + (blockDataDifficulty bd)
-     
-  where getParent h = do
-          SQL.selectFirst [ BlockDataRefHash SQL.==. h ] []
-
-blk2BlkDataRef :: (HasSQLDB m, MonadResource m) 
-               => Block -> BlockId -> m BlockDataRef
+blk2BlkDataRef :: (HasSQLDB m, MonadResource m) =>
+                  Block -> BlockId -> m BlockDataRef
 blk2BlkDataRef b blkId = do
   difficulty <- calcTotalDifficulty b blkId
   return (BlockDataRef pH uH cB sR tR rR lB d n gL gU t eD nc mH blkId (blockHash b) True True difficulty) --- Horrible! Apparently I need to learn the Lens library, yesterday
@@ -136,36 +114,9 @@ blk2BlkDataRef b blkId = do
       nc = blockDataNonce bd
       mH = blockDataMixHash bd
       
-blk2BlkDataRefLite :: (HasSQLDB m, MonadResource m)
-               => Block -> BlockId -> m BlockDataRef
-blk2BlkDataRefLite b blkId = do
-  difficulty <- calcTotalDifficultyLite b blkId
-  return (BlockDataRef pH uH cB sR tR rR lB d n gL gU t eD nc mH blkId (blockHash b) True True difficulty) --- Horrible! Apparently I need to learn the Lens library, yesterday
-  where
-      bd = (blockBlockData b)
-      pH = blockDataParentHash bd
-      uH = blockDataUnclesHash bd
-      cB = blockDataCoinbase bd
-      sR = blockDataStateRoot bd
-      tR = blockDataTransactionsRoot bd
-      rR = blockDataReceiptsRoot bd
-      lB = blockDataLogBloom bd
-      n =  blockDataNumber bd
-      d  = blockDataDifficulty bd
-      gL = blockDataGasLimit bd
-      gU = blockDataGasUsed bd
-      t  = blockDataTimestamp bd
-      eD = blockDataExtraData bd
-      nc = blockDataNonce bd
-      mH = blockDataMixHash bd
-
-
-getBlock::(HasBlockDB m, MonadResource m)=>SHA->m (Maybe Block)
-getBlock h = 
-  fmap (rlpDecode . rlpDeserialize) <$> blockDBGet (BL.toStrict $ encode h)
-
-getBlockLite :: (HasSQLDB m, MonadResource m, MonadBaseControl IO m)=>SHA->m (Maybe Block)
-getBlockLite h = do
+getBlock::(HasSQLDB m, MonadResource m, MonadBaseControl IO m)=>
+          SHA->m (Maybe Block)
+getBlock h = do
   db <- getSQLDB
   entBlkL <- runResourceT $
     SQL.runSqlPool actions db

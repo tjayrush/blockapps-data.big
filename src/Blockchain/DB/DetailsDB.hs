@@ -58,13 +58,13 @@ getBestBlock::HasSQLDB m=>
               m Block
 getBestBlock = do
   bestBlockHash <- getBestBlockHash
-  bestBlock <- getBlockLite bestBlockHash
+  bestBlock <- getBlock bestBlockHash
   return $ fromMaybe (error $ "Missing block in database: " ++ format (bestBlockHash)) bestBlock
 
 getBestProcessedBlock::HasSQLDB m=>
                        m Block
 getBestProcessedBlock = do
   bestBlockHash <- getBestProcessedBlockHash
-  bestBlock <- getBlockLite bestBlockHash
+  bestBlock <- getBlock bestBlockHash
   return $ fromMaybe (error $ "Missing block in database: " ++ format (bestBlockHash)) bestBlock
 

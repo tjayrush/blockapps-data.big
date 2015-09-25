@@ -11,4 +11,4 @@ main::IO ()
 main = do
   _ <- $initHFlags "Setup EthereumH DBs"
   
-  oneTimeSetup flags_genesisBlockName
+  oneTimeSetup

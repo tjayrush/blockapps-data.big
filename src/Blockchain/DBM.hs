@@ -14,17 +14,11 @@ module Blockchain.DBM (
   ) where
 
 
-import Control.Monad.IO.Class
-import Control.Monad.State
 import Control.Monad.Trans.Resource
 import qualified Data.ByteString.Char8 as BC
-import System.Directory
-import System.FilePath
 
 import           Control.Monad.Logger    (runNoLoggingT)
 import qualified Database.Persist.Postgresql as SQL
-
-import Blockchain.Constants
 
 import Blockchain.Data.DataDefs
 import Blockchain.DB.SQLDB
@@ -37,8 +31,10 @@ data DBs =
     sqlDB'::SQLDB
     }
 
+{-
 connStr::SQL.ConnectionString
 connStr = "host=localhost dbname=eth user=postgres password=api port=5432"
+-}
 
 connStr'::SQL.ConnectionString
 connStr' = BC.pack $ "host=localhost dbname=eth user=postgres password=api port=" ++ show (port $ sqlConfig ethConf)

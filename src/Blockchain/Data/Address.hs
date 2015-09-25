@@ -27,10 +27,7 @@ import Control.Applicative
 import qualified Crypto.Hash.SHA3 as C
 import Data.Binary
 import qualified Data.ByteString as B
-import qualified Data.ByteString.Base16 as B16
-import qualified Data.ByteString.Char8 as BC
 import qualified Data.ByteString.Lazy as BL
-import qualified Data.ByteString.Lazy.Char8 as BLC
 import qualified Data.NibbleString as N
 import Data.Maybe
 import Network.Haskoin.Crypto hiding (Address)
