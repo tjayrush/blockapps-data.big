@@ -18,8 +18,6 @@ import Blockchain.Data.Address
 import Blockchain.Data.AddressStateDB
 import Blockchain.Data.BlockDB
 import Blockchain.Data.GenesisInfo
-import Blockchain.Data.StablenetGenesis
-import qualified Blockchain.Data.TestnetGenesis as Testnet
 import Blockchain.Data.DiffDB
 import Blockchain.DB.CodeDB
 import Blockchain.DB.HashDB
@@ -82,27 +80,12 @@ genesisInfoToGenesisBlock gi = do
 initializeGenesisBlock::(HasStateDB m, HasCodeDB m, HasSQLDB m, HasHashDB m)=>
                         String->m Block
 initializeGenesisBlock genesisName = do
-  --liftIO $ putStrLn $ BLC.unpack $ encode $ toJSON canonicalGenesisInfo
   theJSONString <- liftIO $ BLC.readFile "genesis.json"
 
-  let theJSON =
-        case eitherDecode theJSONString of
-          Left x -> error x
-          Right x -> x
+  let theJSON = either error id $ eitherDecode theJSONString
   
-  genesisBlock <-
-      genesisInfoToGenesisBlock theJSON
+  genesisBlock <- genesisInfoToGenesisBlock theJSON
   
-      
-{-  genesisBlock <-
-      genesisInfoToGenesisBlock
-      (
-       case genesisName of
-         "stablenet" -> stablenetGenesisInfo
-         "canonical" -> canonicalGenesisInfo
-         "testnet" -> Testnet.genesisInfo
-         _ -> error $ "Unknown genesis block name: " ++ genesisName
-      ) -}
   (_, genBlkId) <- putBlock genesisBlock
   genAddrStates <- getAllAddressStates
   let diffFromPair (addr', addrS) = CreateAddr addr' addrS
