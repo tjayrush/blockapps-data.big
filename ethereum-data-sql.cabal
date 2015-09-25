@@ -65,7 +65,6 @@ library
                    Blockchain.Data.Address
                    Blockchain.Data.AddressStateDB
                    Blockchain.Data.BlockDB
-                   Blockchain.Data.CanonicalGenesis
                    Blockchain.Data.Code
                    Blockchain.Data.DataDefs
                    Blockchain.Data.DiffDB

@@ -17,7 +17,6 @@ import Blockchain.Database.MerklePatricia
 import Blockchain.Data.Address
 import Blockchain.Data.AddressStateDB
 import Blockchain.Data.BlockDB
-import Blockchain.Data.CanonicalGenesis
 import Blockchain.Data.GenesisInfo
 import Blockchain.Data.StablenetGenesis
 import qualified Blockchain.Data.TestnetGenesis as Testnet
