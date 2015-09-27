@@ -17,7 +17,7 @@ module Blockchain.Data.BlockDB (
   BlockData(..),
   blockHash,
   getBlock,
-  putBlock,
+  putBlocks,
   rawTX2TX,
   tx2RawTX,
   tx2RawTX'
@@ -32,7 +32,9 @@ import qualified Data.ByteString as B
 
 import Data.Functor
 import Data.List
+import qualified Data.Map as M
 import Data.Maybe
+import qualified Data.Set as S
 
 import Data.Time.Clock.POSIX
 
@@ -56,6 +58,8 @@ import Blockchain.Data.Code
 
 import Control.Monad.State
 import Control.Monad.Trans.Resource
+
+import Debug.Trace
 
 rawTX2TX :: RawTransaction -> Transaction
 rawTX2TX (RawTransaction _ nonce gp gl (Just to) val dat r s v _ _ _) = (MessageTX nonce gp gl to val dat r s v)
@@ -92,10 +96,11 @@ calcTotalDifficulty b _ = do
           SQL.selectFirst [ BlockDataRefHash SQL.==. h ] []
 
 blk2BlkDataRef :: (HasSQLDB m, MonadResource m) =>
-                  Block -> BlockId -> m BlockDataRef
-blk2BlkDataRef b blkId = do
-  difficulty <- calcTotalDifficulty b blkId
-  return (BlockDataRef pH uH cB sR tR rR lB d n gL gU t eD nc mH blkId (blockHash b) True True difficulty) --- Horrible! Apparently I need to learn the Lens library, yesterday
+                  M.Map SHA Integer->(Block, SHA)->BlockId->m BlockDataRef
+blk2BlkDataRef dm (b, hash) blkId = do
+  let difficulty = fromMaybe (error $ "missing value in difficulty map: " ++ format hash) $
+                   M.lookup hash dm --  <- calcTotalDifficulty b blkId
+  return (BlockDataRef pH uH cB sR tR rR lB d n gL gU t eD nc mH blkId hash True True difficulty) --- Horrible! Apparently I need to learn the Lens library, yesterday
   where
       bd = (blockBlockData b)
       pH = blockDataParentHash bd
@@ -128,20 +133,64 @@ getBlock h = do
                                    E.where_ ( (bdRef E.^. BlockDataRefHash E.==. E.val h ) E.&&. ( bdRef E.^. BlockDataRefBlockId E.==. block E.^. BlockId ))
                                    return block                        
 
-putBlock::(HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>
-          Block->m (Key Block, Key BlockDataRef)
-putBlock b = do
+getDifficulties::HasSQLDB m=>[SHA]->m [(SHA, Integer)]
+getDifficulties hashes = do
+  db <- getSQLDB
+  blocks <-
+    runResourceT $
+    flip SQL.runSqlPool db $ 
+    E.select $
+    E.from $ \bd -> do
+      E.where_ ((bd E.^. BlockDataRefHash) `E.in_` E.valList hashes)
+      return (bd E.^. BlockDataRefHash, bd E.^. BlockDataRefTotalDifficulty)
+      
+  return $ map f blocks
+
+  where
+    f::(E.Value SHA, E.Value Integer)->(SHA, Integer)
+    f (h, a) = (E.unValue h, E.unValue a)
+
+addDifficulties::M.Map SHA Integer->[(SHA, Integer, SHA)]->M.Map SHA Integer
+addDifficulties dm [] = dm
+addDifficulties dm ((hash, blockDifficulty, parentHash):rest) = 
+  let parentDifficulty = fromMaybe (error $ "missing hash in difficulty map in addDifficulties: " ++ format parentHash ++ ", hash=" ++ format hash) $ M.lookup parentHash dm
+      dm' = M.insert hash (parentDifficulty + blockDifficulty) dm
+  in addDifficulties dm' rest
+
+getDifficultyMap::HasSQLDB m=>
+                  [(Block, SHA)]->m (M.Map SHA Integer)
+getDifficultyMap blocksAndHashes = do
+  let hashes = S.fromList $ map snd blocksAndHashes
+      parents = S.fromList $ map (blockDataParentHash . blockBlockData . fst) blocksAndHashes
+
+  dm' <- fmap (M.fromList . ((SHA 0, 0):)) $ getDifficulties (S.toList $ parents S.\\ hashes)
+
+  return $ addDifficulties dm'
+    (map (\(x, y) ->
+           (y,
+            blockDataDifficulty $ blockBlockData x,
+            blockDataParentHash $ blockBlockData x)
+         ) blocksAndHashes)
+
+
+putBlocks::(HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>
+           [Block]->m [(Key Block, Key BlockDataRef)]
+putBlocks blocks = do
+  let blocksAndHashes = map (\b -> (b, blockHash b)) blocks
+  dm <- getDifficultyMap blocksAndHashes
   db <- getSQLDB
   runResourceT $
-    SQL.runSqlPool actions db
-  where actions = do
+    flip SQL.runSqlPool db $
+    forM blocksAndHashes $ actions dm
+      
+  where actions dm (b, hash) = do
           blkId <- SQL.insert $ b                      
-          toInsert <- lift $ lift $ blk2BlkDataRef b blkId
-          mapM_ (insertOrUpdate blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)))  (blockReceiptTransactions b)))
+          toInsert <- lift $ lift $ blk2BlkDataRef dm (b, hash) blkId
+          mapM_ (insertOrUpdate b blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)))  (blockReceiptTransactions b)))
           blkDataRefId <- SQL.insert $ toInsert
           return $ (blkId, blkDataRefId)
 
-        insertOrUpdate blkid rawTX  = do
+        insertOrUpdate b blkid rawTX  = do
             (txId :: [Entity RawTransaction])
                  <- SQL.selectList [ RawTransactionTxHash SQL.==. (rawTransactionTxHash rawTX )]
                                    [ ]
