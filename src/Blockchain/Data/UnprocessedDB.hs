@@ -10,11 +10,13 @@
 {-# LANGUAGE TypeFamilies               #-}
 {-# LANGUAGE ScopedTypeVariables        #-}
 
-module Blockchain.Data.ProcessedDB (
+module Blockchain.Data.UnprocessedDB (
   Block(..),
-  putProcessed
+  putUnprocessed,
+  deleteUnprocessed
 ) where 
 
+import qualified Database.Esqueleto as E
 import Database.Persist hiding (get)
 import qualified Database.Persist.Postgresql as SQL
 
@@ -24,12 +26,21 @@ import Blockchain.Data.DataDefs
 import Control.Monad.State
 import Control.Monad.Trans.Resource
 
-putProcessed :: (HasSQLDB m, MonadIO m)=>
-               [Processed]->m [Key Processed]
-putProcessed ps = do
+putUnprocessed :: (HasSQLDB m, MonadIO m)=>
+               [Unprocessed]->m [Key Unprocessed]
+putUnprocessed ps = do
   db <- getSQLDB
   runResourceT $ flip SQL.runSqlPool db $
     forM ps $ \p -> SQL.insert p
 
---instance Format Processed where
---  format Processed{processedBlockId=blockId} = CL.yellow $ format blockId
+deleteUnprocessed::(HasSQLDB m, MonadIO m)=>
+               [E.Key Block]->m ()
+deleteUnprocessed blockIds = do
+  db <- getSQLDB
+  runResourceT $ flip SQL.runSqlPool db $
+    E.delete $
+    E.from $ \p ->
+    E.where_ (p E.^. UnprocessedBlockId `E.in_` E.valList blockIds)
+
+--instance Format Unprocessed where
+--  format Unprocessed{unprocessedBlockId=blockId} = CL.yellow $ format blockId

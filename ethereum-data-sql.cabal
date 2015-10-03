@@ -73,7 +73,7 @@ library
                    Blockchain.Data.Json
                    Blockchain.Data.Log
                    Blockchain.Data.PersistTypes
-                   Blockchain.Data.ProcessedDB
+                   Blockchain.Data.UnprocessedDB
                    Blockchain.Data.RawTransaction
                    Blockchain.Data.Transaction
                    Blockchain.Data.TransactionReceipt

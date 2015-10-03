@@ -32,8 +32,8 @@ getBestProcessedBlockHash::HasSQLDB m=>
                            m SHA
 getBestProcessedBlockHash = do
   ret <- sqlQuery $
-         E.select $ E.from $ \(bd `E.InnerJoin` processed) -> do
-           E.on (bd E.^. BlockDataRefBlockId E.==. processed E.^. ProcessedBlockId)
+         E.select $ E.from $ \(bd `E.InnerJoin` unprocessed) -> do
+           E.on (bd E.^. BlockDataRefBlockId E.==. unprocessed E.^. UnprocessedBlockId)
            E.limit 1
            E.orderBy [E.desc (bd E.^. BlockDataRefTotalDifficulty)]
            return $ bd E.^. BlockDataRefHash

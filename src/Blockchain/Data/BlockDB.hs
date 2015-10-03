@@ -188,6 +188,7 @@ putBlocks blocks = do
           toInsert <- lift $ lift $ blk2BlkDataRef dm (b, hash) blkId
           mapM_ (insertOrUpdate b blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)))  (blockReceiptTransactions b)))
           blkDataRefId <- SQL.insert $ toInsert
+          _ <- SQL.insert $ Unprocessed blkId
           return $ (blkId, blkDataRefId)
 
         insertOrUpdate b blkid rawTX  = do

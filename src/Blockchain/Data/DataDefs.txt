@@ -147,6 +147,6 @@ BlockAppLogin json
     ip String
     deriving Show Read Eq
 
-Processed json
+Unprocessed json
     blockId BlockId
     deriving Show

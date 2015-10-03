@@ -18,7 +18,7 @@ import System.FilePath
 
 import qualified Blockchain.Colors as CL
 import qualified Blockchain.Database.MerklePatricia as MP
-import Blockchain.Data.ProcessedDB
+import Blockchain.Data.UnprocessedDB
 import Blockchain.Data.DataDefs
 import Blockchain.Data.GenesisBlock
 import Blockchain.DB.CodeDB
@@ -86,7 +86,7 @@ oneTimeSetup = do
 
     rawExecute "CREATE INDEX CONCURRENTLY ON storage (key);" []
     
-    rawExecute "CREATE INDEX CONCURRENTLY ON processed (block_id);" []
+    rawExecute "CREATE INDEX CONCURRENTLY ON unprocessed (block_id);" []
 
   _ <-
     runResourceT $ do
@@ -110,7 +110,7 @@ oneTimeSetup = do
         liftIO $ putStrLn $ CL.yellow ">>>> Initializing Genesis Block"
         _ <- initializeGenesisBlock
         genesisBlockId <- getGenesisBlockId
-        putProcessed [Processed genesisBlockId]
+        putUnprocessed [Unprocessed genesisBlockId]
 
   return ()
 
