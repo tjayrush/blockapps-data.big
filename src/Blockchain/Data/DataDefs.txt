@@ -150,3 +150,8 @@ BlockAppLogin json
 Unprocessed json
     blockId BlockId
     deriving Show
+
+Extra
+    key String
+    value String
+    Primary key

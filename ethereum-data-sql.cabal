@@ -68,6 +68,7 @@ library
                    Blockchain.Data.Code
                    Blockchain.Data.DataDefs
                    Blockchain.Data.DiffDB
+                   Blockchain.Data.Extra
                    Blockchain.Data.GenesisBlock
                    Blockchain.Data.GenesisInfo
                    Blockchain.Data.Json
