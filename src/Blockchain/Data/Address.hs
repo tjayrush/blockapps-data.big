@@ -91,19 +91,18 @@ prvKey2Address prvKey =
   Address $ fromInteger $ byteString2Integer $ C.hash 256 $ BL.toStrict $ encode x `BL.append` encode y
   --B16.encode $ hash 256 $ BL.toStrict $ encode x `BL.append` encode y
   where
-    PubKey point = derivePubKey prvKey
+    point = pubKeyPoint $ derivePubKey prvKey
     x = fromMaybe (error "getX failed in prvKey2Address") $ getX point
     y = fromMaybe (error "getY failed in prvKey2Address") $ getY point
 
 pubKey2Address::PubKey->Address
-pubKey2Address (PubKey point) =
+pubKey2Address pubKey =
   Address $ fromInteger $ byteString2Integer $ C.hash 256 $ BL.toStrict $ encode x `BL.append` encode y
   --B16.encode $ hash 256 $ BL.toStrict $ encode x `BL.append` encode y
   where
     x = fromMaybe (error "getX failed in prvKey2Address") $ getX point
     y = fromMaybe (error "getY failed in prvKey2Address") $ getY point
-pubKey2Address (PubKeyU _) = error "Missing case in pubKey2Address: PubKeyU"
-
+    point = pubKeyPoint pubKey
 
 instance RLPSerializable Address where
   rlpEncode (Address a) = RLPString $ BL.toStrict $ encode a
