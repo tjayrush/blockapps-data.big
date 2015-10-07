@@ -22,7 +22,6 @@ module Blockchain.Data.Address (
   ) where
 
 import Control.Monad
-import Control.Applicative
        
 import qualified Crypto.Hash.SHA3 as C
 import Data.Binary

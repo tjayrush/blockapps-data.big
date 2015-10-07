@@ -7,8 +7,6 @@
 
 module Blockchain.Data.Json where
 
-import Control.Applicative
-
 import Blockchain.Data.DataDefs
 import Blockchain.Data.Address
 import Blockchain.Data.Transaction

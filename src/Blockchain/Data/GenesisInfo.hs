@@ -5,7 +5,6 @@ module Blockchain.Data.GenesisInfo (
   GenesisInfo(..)
   ) where
 
-import Control.Applicative
 import Data.Aeson
 import qualified Data.ByteString as B
 import Data.Time

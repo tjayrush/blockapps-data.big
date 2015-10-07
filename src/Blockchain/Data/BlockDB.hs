@@ -30,7 +30,6 @@ import qualified Database.Esqueleto as E
 
 import qualified Data.ByteString as B
 
-import Data.Functor
 import Data.List
 import qualified Data.Map as M
 import Data.Maybe
@@ -59,7 +58,7 @@ import Blockchain.Data.Code
 import Control.Monad.State
 import Control.Monad.Trans.Resource
 
-import Debug.Trace
+--import Debug.Trace
 
 rawTX2TX :: RawTransaction -> Transaction
 rawTX2TX (RawTransaction _ nonce gp gl (Just to) val dat r s v _ _ _) = (MessageTX nonce gp gl to val dat r s v)
@@ -77,7 +76,7 @@ tx2RawTX tx blkId blkNum =
 tx2RawTX' :: Transaction -> RawTransaction
 tx2RawTX' tx = tx2RawTX tx (E.toSqlKey 1) (-1)
 
-calcTotalDifficulty :: (HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>
+{-calcTotalDifficulty :: (HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>
                        Block -> BlockId -> m Integer
 calcTotalDifficulty b _ = do
   db <- getSQLDB
@@ -93,14 +92,14 @@ calcTotalDifficulty b _ = do
     Just p -> return $ (blockDataRefTotalDifficulty . entityVal $ p) + (blockDataDifficulty bd)
      
   where getParent h = do
-          SQL.selectFirst [ BlockDataRefHash SQL.==. h ] []
+          SQL.selectFirst [ BlockDataRefHash SQL.==. h ] [] -}
 
 blk2BlkDataRef :: (HasSQLDB m, MonadResource m) =>
                   M.Map SHA Integer->(Block, SHA)->BlockId->m BlockDataRef
-blk2BlkDataRef dm (b, hash) blkId = do
-  let difficulty = fromMaybe (error $ "missing value in difficulty map: " ++ format hash) $
-                   M.lookup hash dm --  <- calcTotalDifficulty b blkId
-  return (BlockDataRef pH uH cB sR tR rR lB d n gL gU t eD nc mH blkId hash True True difficulty) --- Horrible! Apparently I need to learn the Lens library, yesterday
+blk2BlkDataRef dm (b, hash') blkId = do
+  let difficulty = fromMaybe (error $ "missing value in difficulty map: " ++ format hash') $
+                   M.lookup hash' dm --  <- calcTotalDifficulty b blkId
+  return (BlockDataRef pH uH cB sR tR rR lB d n gL gU t eD nc mH blkId hash' True True difficulty) --- Horrible! Apparently I need to learn the Lens library, yesterday
   where
       bd = (blockBlockData b)
       pH = blockDataParentHash bd
@@ -152,9 +151,9 @@ getDifficulties hashes = do
 
 addDifficulties::M.Map SHA Integer->[(SHA, Integer, SHA)]->M.Map SHA Integer
 addDifficulties dm [] = dm
-addDifficulties dm ((hash, blockDifficulty, parentHash):rest) = 
-  let parentDifficulty = fromMaybe (error $ "missing hash in difficulty map in addDifficulties: " ++ format parentHash ++ ", hash=" ++ format hash) $ M.lookup parentHash dm
-      dm' = M.insert hash (parentDifficulty + blockDifficulty) dm
+addDifficulties dm ((hash', blockDifficulty, parentHash):rest) = 
+  let parentDifficulty = fromMaybe (error $ "missing hash in difficulty map in addDifficulties: " ++ format parentHash ++ ", hash=" ++ format hash') $ M.lookup parentHash dm
+      dm' = M.insert hash' (parentDifficulty + blockDifficulty) dm
   in addDifficulties dm' rest
 
 getDifficultyMap::HasSQLDB m=>
@@ -183,9 +182,9 @@ putBlocks blocks = do
     flip SQL.runSqlPool db $
     forM blocksAndHashes $ actions dm
       
-  where actions dm (b, hash) = do
+  where actions dm (b, hash') = do
           blkId <- SQL.insert $ b                      
-          toInsert <- lift $ lift $ blk2BlkDataRef dm (b, hash) blkId
+          toInsert <- lift $ lift $ blk2BlkDataRef dm (b, hash') blkId
           mapM_ (insertOrUpdate b blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)))  (blockReceiptTransactions b)))
           blkDataRefId <- SQL.insert $ toInsert
           _ <- SQL.insert $ Unprocessed blkId
