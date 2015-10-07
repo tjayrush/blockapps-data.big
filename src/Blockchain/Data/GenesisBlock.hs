@@ -16,6 +16,7 @@ import Blockchain.Database.MerklePatricia
 import Blockchain.Data.Address
 import Blockchain.Data.AddressStateDB
 import Blockchain.Data.BlockDB
+import Blockchain.Data.Extra
 import Blockchain.Data.GenesisInfo
 import Blockchain.Data.DiffDB
 import Blockchain.DB.CodeDB
@@ -88,6 +89,8 @@ initializeGenesisBlock = do
   genAddrStates <- getAllAddressStates
   let diffFromPair (addr', addrS) = CreateAddr addr' addrS
   commitSqlDiffs genBlkId 0 $ map diffFromPair genAddrStates
+
+  putBestProcessedStateRoot (blockDataStateRoot $ blockBlockData genesisBlock) (blockDataNumber $ blockBlockData genesisBlock)
 
   return genesisBlock
 
