@@ -28,8 +28,6 @@ library
                  , cryptohash
                  , data-default
                  , directory
-                 , either
-                 , entropy
                  , ethereum-conf
                  , ethereum-merkle-patricia-db
                  , ethereum-rlp
@@ -37,23 +35,17 @@ library
                  , haskoin
                  , leveldb-haskell
                  , mtl
-                 , network
                  , nibblestring
                  , persistent
                  , persistent-template
                  , persistent-postgresql
                  , resourcet
-                 , SHA2
                  , time
                  , transformers
-                 , unordered-containers
-                 , vector
                  , ansi-wl-pprint
                  , monad-logger
                  , aeson
-                 , syb
                  , text
-                 , attoparsec
                  , path-pieces
                  , ethereum-encryption
                  , ethereum-util
