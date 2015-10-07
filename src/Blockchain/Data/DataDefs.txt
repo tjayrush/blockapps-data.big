@@ -152,6 +152,7 @@ Unprocessed json
     deriving Show
 
 Extra
-    key String
+    theKey String
     value String
-    Primary key
+    Primary theKey
+    TheKey theKey
