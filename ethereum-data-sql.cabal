@@ -28,7 +28,7 @@ library
                  , cryptohash
                  , data-default
                  , directory
-                 --, ethereum-conf
+                 , ethereum-conf
                  , ethereum-merkle-patricia-db
                  , ethereum-rlp
                  , filepath
