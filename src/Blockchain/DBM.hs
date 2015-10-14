@@ -42,6 +42,4 @@ connStr' = BC.pack $ "host=localhost dbname=eth user=postgres password=api port=
 openDBs::(MonadResource m, MonadBaseControl IO m)=>m DBs
 openDBs = do
   sqldb <-   runNoLoggingT  $ SQL.createPostgresqlPool connStr' 20
-  SQL.runSqlPool (SQL.runMigration migrateAll) sqldb
-  return $ DBs
-      sqldb
+  return $ DBs sqldb
