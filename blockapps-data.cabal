@@ -48,7 +48,7 @@ library
                  , text
                  , path-pieces
                  , ethereum-encryption
-                 , ethereum-util
+                 , blockapps-util
                  , esqueleto
                  , crypto-pubkey-types
       		 
@@ -92,7 +92,7 @@ executable strato-setup
     build-depends: 
                    base >= 4 && < 5
                  , blockapps-data
-                 , ethereum-util
+                 , blockapps-util
                  , hflags
     buildable: True
     main-is: Main.hs
