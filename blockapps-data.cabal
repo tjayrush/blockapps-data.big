@@ -28,8 +28,8 @@ library
                  , cryptohash
                  , data-default
                  , directory
-                 , ethereum-conf
-                 , ethereum-merkle-patricia-db
+                 , strato-conf
+                 , merkle-patricia-db
                  , ethereum-rlp
                  , filepath
                  , haskoin
@@ -91,7 +91,7 @@ executable ethereum-setup
     ghc-options: -Wall -O2
     build-depends: 
                    base >= 4 && < 5
-                 , ethereum-data-sql
+                 , blockapps-data
                  , ethereum-util
                  , hflags
     buildable: True
