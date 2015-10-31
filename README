@@ -1,24 +1,7 @@
+#blockapps-data
 
-This repository is a library of common data structures for the ethereum haskell project.
+[![BlockApps logo](http://blockapps.net/img/logo_cropped.png)](http://blockapps.net)
 
-Indexing recommendations:
-Run psql eth while ethereumH is populating the database and
-
-CREATE INDEX CONCURRENTLY ON block_data_ref (block_id);
-CREATE INDEX CONCURRENTLY ON block_data_ref (number);
-CREATE INDEX CONCURRENTLY ON block_data_ref (hash);
-CREATE INDEX CONCURRENTLY ON block_data_ref (parent_hash);
-CREATE INDEX CONCURRENTLY ON block_data_ref (coinbase);
-CREATE INDEX CONCURRENTLY ON block_data_ref (total_difficulty);
-
-CREATE INDEX CONCURRENTLY ON address_state_ref (address);
-
-CREATE INDEX CONCURRENTLY ON raw_transaction (from_address);
-CREATE INDEX CONCURRENTLY ON raw_transaction (to_address);
-CREATE INDEX CONCURRENTLY ON raw_transaction (block_id);
-CREATE INDEX CONCURRENTLY ON raw_transaction (block_number); 
-
-CREATE INDEX CONCURRENTLY ON storage (key);
-
+This repository is a library of common data structures for the blockapps blockchain projects.
 
 
