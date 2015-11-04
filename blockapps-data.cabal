@@ -97,4 +97,5 @@ executable strato-setup
                  , hflags
     buildable: True
     main-is: Main.hs
+    extra-libraries: leveldb
     hs-source-dirs: exec_src
