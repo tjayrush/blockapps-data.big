@@ -84,6 +84,7 @@ library
     ghc-options: -Wall -O2 -static
     extensions: TemplateHaskell
     buildable: True
+    extra-libraries: leveldb
     hs-source-dirs: src
 
 executable strato-setup
