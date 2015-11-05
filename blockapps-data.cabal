@@ -30,7 +30,7 @@ library
                  , data-default
                  , directory
                  , strato-conf
-                 , merkle-patricia-db
+                 , merkle-patricia
                  , ethereum-rlp
                  , filepath
                  , haskoin

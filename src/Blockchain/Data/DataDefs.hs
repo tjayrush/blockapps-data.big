@@ -26,7 +26,7 @@ import Blockchain.Data.Address
 import Blockchain.Data.PersistTypes ()
 import Blockchain.MiscJSON ()
 import Blockchain.Data.Transaction
-import Blockchain.Database.MerklePatricia
+import Blockchain.Database.MerklePatricia.SHAPtr
 
 import qualified Data.ByteString as BS
 

@@ -13,7 +13,7 @@ import Blockchain.Data.Address
 import Blockchain.Data.Transaction
 import Blockchain.ExtWord
 import Blockchain.SHA
-import Blockchain.Database.MerklePatricia
+import Blockchain.Database.MerklePatricia.SHAPtr
 
 import qualified Data.ByteString.Base16 as B16
 import qualified Data.Text as T
