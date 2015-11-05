@@ -23,6 +23,7 @@ library
                    base >= 4 && < 5
                  , base16-bytestring
                  , binary
+             --    , blockapps-data-db
                  , bytestring
                  , containers
                  , cryptohash
@@ -33,7 +34,7 @@ library
                  , ethereum-rlp
                  , filepath
                  , haskoin
-                 , leveldb-haskell
+                -- , leveldb-haskell
                  , mtl
                  , nibblestring
                  , persistent
@@ -53,49 +54,40 @@ library
                  , crypto-pubkey-types
       		 
     exposed-modules: 
-                   Blockchain.Constants
+                   --Blockchain.Constants
                    Blockchain.Data.Address
-                   Blockchain.Data.AddressStateDB
-                   Blockchain.Data.BlockDB
+                   --Blockchain.Data.AddressStateDB
+                   --Blockchain.Data.BlockDB
                    Blockchain.Data.Code
                    Blockchain.Data.DataDefs
-                   Blockchain.Data.DiffDB
-                   Blockchain.Data.Extra
-                   Blockchain.Data.GenesisBlock
-                   Blockchain.Data.GenesisInfo
-                   Blockchain.Data.Json
-                   Blockchain.Data.Log
+                   --Blockchain.Data.DiffDB
+                   --Blockchain.Data.Extra
+                   --Blockchain.Data.GenesisBlock
+                   --Blockchain.Data.GenesisInfo
+                   --Blockchain.Data.Json
+                   --Blockchain.Data.Log
                    Blockchain.Data.PersistTypes
-                   Blockchain.Data.UnprocessedDB
-                   Blockchain.Data.RawTransaction
+                   --Blockchain.Data.UnprocessedDB
+                   --Blockchain.Data.RawTransaction
                    Blockchain.Data.Transaction
-                   Blockchain.Data.TransactionReceipt
-                   Blockchain.Data.TransactionResult
-                   Blockchain.DBM
-                   Blockchain.DB.BlockDB
-                   Blockchain.DB.CodeDB
-                   Blockchain.DB.DetailsDB
-                   Blockchain.DB.HashDB
-                   Blockchain.DB.SQLDB   
-                   Blockchain.DB.StateDB
-                   Blockchain.DB.StorageDB
-                   Blockchain.ExtDBs
-                   Blockchain.Setup
+                   --Blockchain.Data.TransactionReceipt
+                   --Blockchain.Data.TransactionResult
+                   --Blockchain.DBM
+                   --Blockchain.ExtDBs
     ghc-options: -Wall -O2 -static
     extensions: TemplateHaskell
     buildable: True
-    extra-libraries: leveldb
     hs-source-dirs: src
 
-executable strato-setup
-    default-language: Haskell98
-    ghc-options: -Wall -O2
-    build-depends: 
-                   base >= 4 && < 5
-                 , blockapps-data
-                 , blockapps-util
-                 , hflags
-    buildable: True
-    main-is: Main.hs
-    extra-libraries: leveldb
-    hs-source-dirs: exec_src
+--executable strato-setup
+--    default-language: Haskell98
+--    ghc-options: -Wall -O2
+--    build-depends: 
+--                   base >= 4 && < 5
+--                 , blockapps-data
+--                 , blockapps-util
+--                 , hflags
+--    buildable: True
+--    main-is: Main.hs
+--    extra-libraries: leveldb
+--    hs-source-dirs: exec_src
