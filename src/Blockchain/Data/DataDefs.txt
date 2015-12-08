@@ -156,3 +156,13 @@ Extra
     value String
     Primary theKey
     TheKey theKey
+
+LogDB
+    transactionHash SHA
+    address Address
+    topic1 Word256 Maybe
+    topic2 Word256 Maybe
+    topic3 Word256 Maybe
+    topic4 Word256 Maybe
+    theData BS.ByteString
+    bloom Word512

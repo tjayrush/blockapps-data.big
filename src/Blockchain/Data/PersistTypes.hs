@@ -61,6 +61,14 @@ instance PersistField Word256 where
 instance PersistFieldSql Word256 where
   sqlType _ = SqlOther $ T.pack "varchar(64)" 
 
+instance PersistField Word512 where
+  toPersistValue i = PersistText . T.pack $ showHexFixed 128 (fromIntegral i :: Integer) 
+  fromPersistValue (PersistText s) = Right $ (fromIntegral $ ((fst . head .  readHex $ T.unpack s) :: Integer) :: Word512)
+  fromPersistValue x = Left $ T.pack $ "PersistField Word512: expected integer: " ++ (show x)
+
+instance PersistFieldSql Word512 where
+  sqlType _ = SqlOther $ T.pack "varchar(128)" 
+
 instance PersistField SHAPtr where
   toPersistValue (SHAPtr s) = PersistText . decodeUtf8 . B16.encode $ s
   fromPersistValue (PersistText s) = Right . SHAPtr . fst . B16.decode . encodeUtf8 $ s
