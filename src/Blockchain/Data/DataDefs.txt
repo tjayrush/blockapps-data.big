@@ -166,3 +166,4 @@ LogDB
     topic4 Word256 Maybe
     theData BS.ByteString
     bloom Word512
+    deriving Show Read Eq
