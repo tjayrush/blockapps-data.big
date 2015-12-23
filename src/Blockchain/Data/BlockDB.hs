@@ -35,6 +35,8 @@ import qualified Data.Map as M
 import Data.Maybe
 import qualified Data.Set as S
 
+import Data.Time.Calendar
+import Data.Time.Clock
 import Data.Time.Clock.POSIX
 
 import Numeric
@@ -61,20 +63,20 @@ import Control.Monad.Trans.Resource
 --import Debug.Trace
 
 rawTX2TX :: RawTransaction -> Transaction
-rawTX2TX (RawTransaction _ nonce gp gl (Just to) val dat r s v _ _ _) = (MessageTX nonce gp gl to val dat r s v)
-rawTX2TX (RawTransaction _ nonce gp gl Nothing val init' r s v _ _ _) = (ContractCreationTX nonce gp gl val (Code init') r s v)
+rawTX2TX (RawTransaction _ _ nonce gp gl (Just to) val dat r s v _ _ _) = (MessageTX nonce gp gl to val dat r s v)
+rawTX2TX (RawTransaction _ _ nonce gp gl Nothing val init' r s v _ _ _) = (ContractCreationTX nonce gp gl val (Code init') r s v)
 
-tx2RawTX :: Transaction -> (Key Block) -> Integer ->  RawTransaction
-tx2RawTX tx blkId blkNum =
+tx2RawTX :: Transaction -> (Key Block) -> Integer -> UTCTime -> RawTransaction
+tx2RawTX tx blkId blkNum time =
   case tx of
-    (MessageTX nonce gp gl to val dat r s v) -> (RawTransaction signer nonce gp gl (Just to) val dat r s v blkId (fromIntegral $ blkNum) (hash $ rlpSerialize $ rlpEncode tx))
-    (ContractCreationTX nonce gp gl val (Code init') r s v) ->  (RawTransaction signer nonce gp gl Nothing val init' r s v blkId (fromIntegral $ blkNum) (hash $ rlpSerialize $ rlpEncode tx))
+    (MessageTX nonce gp gl to val dat r s v) -> (RawTransaction time signer nonce gp gl (Just to) val dat r s v blkId (fromIntegral $ blkNum) (hash $ rlpSerialize $ rlpEncode tx))
+    (ContractCreationTX nonce gp gl val (Code init') r s v) ->  (RawTransaction time signer nonce gp gl Nothing val init' r s v blkId (fromIntegral $ blkNum) (hash $ rlpSerialize $ rlpEncode tx))
   where
     signer = fromMaybe (Address (-1)) $ whoSignedThisTransaction tx
 
 
 tx2RawTX' :: Transaction -> RawTransaction
-tx2RawTX' tx = tx2RawTX tx (E.toSqlKey 1) (-1)
+tx2RawTX' tx = tx2RawTX tx (E.toSqlKey 1) (-1) (UTCTime (fromGregorian 0 0 0) (secondsToDiffTime 0))
 
 {-calcTotalDifficulty :: (HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>
                        Block -> BlockId -> m Integer
@@ -185,7 +187,8 @@ putBlocks blocks = do
   where actions dm (b, hash') = do
           blkId <- SQL.insert $ b                      
           toInsert <- lift $ lift $ blk2BlkDataRef dm (b, hash') blkId
-          mapM_ (insertOrUpdate b blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)))  (blockReceiptTransactions b)))
+          time <- liftIO getCurrentTime
+          mapM_ (insertOrUpdate b blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)) time)  (blockReceiptTransactions b)))
           blkDataRefId <- SQL.insert $ toInsert
           _ <- SQL.insert $ Unprocessed blkId
           return $ (blkId, blkDataRefId)

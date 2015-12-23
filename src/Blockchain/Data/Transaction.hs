@@ -29,9 +29,12 @@ module Blockchain.Data.Transaction (
   transactionHash
   ) where
 
+import Control.Monad.IO.Class
+
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Base16 as B16
 import Data.ByteString.Internal
+import Data.Time.Clock
 import Data.Word
 import Numeric
 import Text.PrettyPrint.ANSI.Leijen
@@ -55,7 +58,7 @@ addLeadingZerosTo64::String->String
 addLeadingZerosTo64 x = replicate (64 - length x) '0' ++ x
 
 
-createMessageTX::Monad m=>Integer->Integer->Integer->Address->Integer->B.ByteString->PrvKey->SecretT m Transaction
+createMessageTX::MonadIO m=>Integer->Integer->Integer->Address->Integer->B.ByteString->PrvKey->SecretT m Transaction
 createMessageTX n gp gl to' val theData prvKey = do
   let unsignedTX = MessageTX {
                      transactionNonce = n,
@@ -83,7 +86,7 @@ createMessageTX n gp gl to' val theData prvKey = do
       transactionV = if yIsOdd then 0x1c else 0x1b
     }
 
-createContractCreationTX::Monad m=>Integer->Integer->Integer->Integer->Code->PrvKey->SecretT m Transaction
+createContractCreationTX::MonadIO m=>Integer->Integer->Integer->Integer->Code->PrvKey->SecretT m Transaction
 createContractCreationTX n gp gl val init' prvKey = do
   let unsignedTX = ContractCreationTX {
                      transactionNonce = n,

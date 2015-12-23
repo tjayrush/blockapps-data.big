@@ -62,7 +62,8 @@ AddressStateRef
     latestBlockDataRefNumber Integer
     deriving Show Read Eq
 
-RawTransaction 
+RawTransaction
+    timestamp UTCTime
     fromAddress Address
     nonce Integer sqltype=numeric(1000,0)
     gasPrice Integer sqltype=numeric(1000,0)
