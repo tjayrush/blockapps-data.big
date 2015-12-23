@@ -20,7 +20,6 @@ import qualified Data.ByteString.Char8 as BC
 import           Control.Monad.Logger    (runNoLoggingT)
 import qualified Database.Persist.Postgresql as SQL
 
-import Blockchain.Data.DataDefs
 import Blockchain.DB.SQLDB
 import Blockchain.EthConf
 

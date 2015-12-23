@@ -339,6 +339,36 @@ instance FromJSON AddressStateRef' where
               )
     parseJSON _ = fail "JSON not an object"
 
+showHexSimple :: (Show a, Integral a) => a -> String
+showHexSimple = (\t -> (showHex t "")) 
+
+instance ToJSON LogDB where
+    toJSON (LogDB h
+                  (Address x)
+                  maybeTopic1
+                  maybeTopic2
+                  maybeTopic3
+                  maybeTopic4
+                  dataBS
+                  bloomW512) = 
+        object ["hash" .= h,
+                "address" .= (showHex x ""),
+                "topic1" .= ((fromMaybe "" (fmap showHexSimple maybeTopic1)) :: String),
+                "topic2" .= ((fromMaybe "" (fmap showHexSimple maybeTopic2)) :: String),
+                "topic3" .= ((fromMaybe "" (fmap showHexSimple maybeTopic3)) :: String),
+                "topic4" .= ((fromMaybe "" (fmap showHexSimple maybeTopic4)) :: String),
+
+                "data" .= dataBS,
+                "bloom" .= showHexSimple bloomW512 ]
+
+{-
+Not needed yet.
+
+instance FromJSON LogDB where
+    parseJSON (Object s) = do
+  
+    parseJSON _ = fail "malformed log"
+-}
 asrToAsrPrime :: AddressStateRef -> AddressStateRef'
 asrToAsrPrime x = AddressStateRef' x
 
