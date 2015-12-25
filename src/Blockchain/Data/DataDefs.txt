@@ -110,6 +110,7 @@ TransactionResult json
     etherUsed Word256
     contractsCreated String
     contractsDeleted String
+    stateDiff String
     time Double
     newStorage String
     deletedStorage String
