@@ -19,8 +19,7 @@ module Blockchain.Data.BlockDB (
   getBlock,
   putBlocks,
   rawTX2TX,
-  tx2RawTX,
-  tx2RawTX'
+  tx2RawTXAndTime,
 ) where 
 
 import Database.Persist hiding (get)
@@ -66,8 +65,8 @@ rawTX2TX :: RawTransaction -> Transaction
 rawTX2TX (RawTransaction _ _ nonce gp gl (Just to) val dat r s v _ _ _) = (MessageTX nonce gp gl to val dat r s v)
 rawTX2TX (RawTransaction _ _ nonce gp gl Nothing val init' r s v _ _ _) = (ContractCreationTX nonce gp gl val (Code init') r s v)
 
-tx2RawTX :: Transaction -> (Key Block) -> Integer -> UTCTime -> RawTransaction
-tx2RawTX tx blkId blkNum time =
+txAndTime2RawTX :: Transaction -> (Key Block) -> Integer -> UTCTime -> RawTransaction
+txAndTime2RawTX tx blkId blkNum time =
   case tx of
     (MessageTX nonce gp gl to val dat r s v) -> (RawTransaction time signer nonce gp gl (Just to) val dat r s v blkId (fromIntegral $ blkNum) (hash $ rlpSerialize $ rlpEncode tx))
     (ContractCreationTX nonce gp gl val (Code init') r s v) ->  (RawTransaction time signer nonce gp gl Nothing val init' r s v blkId (fromIntegral $ blkNum) (hash $ rlpSerialize $ rlpEncode tx))
@@ -75,8 +74,10 @@ tx2RawTX tx blkId blkNum time =
     signer = fromMaybe (Address (-1)) $ whoSignedThisTransaction tx
 
 
-tx2RawTX' :: Transaction -> RawTransaction
-tx2RawTX' tx = tx2RawTX tx (E.toSqlKey 1) (-1) (UTCTime (fromGregorian 0 0 0) (secondsToDiffTime 0))
+tx2RawTXAndTime :: (MonadIO m) => Transaction -> m RawTransaction
+tx2RawTXAndTime tx = do
+  time <- liftIO getCurrentTime
+  return $ txAndTime2RawTX tx (E.toSqlKey 1) (-1) time
 
 {-calcTotalDifficulty :: (HasSQLDB m, MonadResource m, MonadBaseControl IO m, MonadThrow m)=>
                        Block -> BlockId -> m Integer
@@ -188,7 +189,7 @@ putBlocks blocks = do
           blkId <- SQL.insert $ b                      
           toInsert <- lift $ lift $ blk2BlkDataRef dm (b, hash') blkId
           time <- liftIO getCurrentTime
-          mapM_ (insertOrUpdate b blkId) ((map (\tx -> tx2RawTX tx blkId (blockDataNumber (blockBlockData b)) time)  (blockReceiptTransactions b)))
+          mapM_ (insertOrUpdate b blkId) ((map (\tx -> txAndTime2RawTX tx blkId (blockDataNumber (blockBlockData b)) time)  (blockReceiptTransactions b)))
           blkDataRefId <- SQL.insert $ toInsert
           _ <- SQL.insert $ Unprocessed blkId
           return $ (blkId, blkDataRefId)
