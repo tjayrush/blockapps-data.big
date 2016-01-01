@@ -244,7 +244,7 @@ instance RLPSerializable BlockData where
       blockDataTimestamp = posixSecondsToUTCTime $ fromInteger $ rlpDecode v12,
       blockDataExtraData = rlpDecode v13,
       blockDataMixHash = rlpDecode v14,
-      blockDataNonce = bytesToWord64 $ B.unpack $ rlpDecode v15
+      blockDataNonce = Just (bytesToWord64 $ B.unpack $ rlpDecode v15)
       }  
   rlpDecode (RLPArray arr) = error ("Error in rlpDecode for Block: wrong number of items, expected 15, got " ++ show (length arr) ++ ", arr = " ++ show (pretty arr))
   rlpDecode x = error ("rlp2BlockData called on non block object: " ++ show x)
@@ -266,7 +266,7 @@ instance RLPSerializable BlockData where
       rlpEncode (round $ utcTimeToPOSIXSeconds $ blockDataTimestamp bd::Integer),
       rlpEncode $ blockDataExtraData bd,
       rlpEncode $ blockDataMixHash bd,
-      rlpEncode $ B.pack $ word64ToBytes $ blockDataNonce bd
+      rlpEncode $ B.pack $ word64ToBytes $ fromMaybe 0 (blockDataNonce bd)
       ]
 
 blockHash::Block->SHA
@@ -286,5 +286,6 @@ instance Format BlockData where
     "gasUsed: " ++ show (blockDataGasUsed b) ++ "\n" ++
     "timestamp: " ++ show (blockDataTimestamp b) ++ "\n" ++
     "extraData: " ++ show (pretty $ blockDataExtraData b) ++ "\n" ++
-    "nonce: " ++ showHex (blockDataNonce b) "" ++ "\n"
+    "nonce: " ++ showHex (fromMaybe 0 (blockDataNonce b)) "" ++ "\n"
+
 

@@ -12,7 +12,7 @@ BlockData
     gasUsed Integer sqltype=numeric(1000,0)
     timestamp UTCTime
     extraData Integer 
-    nonce Word64
+    nonce Word64 Maybe
     mixHash SHA
     deriving Show Read Eq
 
@@ -30,7 +30,7 @@ BlockDataRef
     gasUsed Integer sqltype=numeric(1000,0)
     timestamp UTCTime
     extraData Integer
-    nonce Word64
+    nonce Word64 Maybe
     mixHash SHA
     blockId BlockId
     hash SHA
